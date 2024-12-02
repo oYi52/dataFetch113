@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="display-zone"></div>
+    <div id="chart"></div>
+    <table>
+        <thead>
+            <tr>
+                <th>年分</th>
+                <th>男性嬰兒總數</th>
+                <th>女性嬰兒總數</th>
+                <th>嬰兒出生總數</th>
+            </tr>
+        </thead>
+        <tbody id="insert-here">
+        </tbody>
+    </table>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <script src="data.js"></script>
+    <script>
+        var zone = document.getElementById("display-zone");
+        var table = document.getElementById("insert-here");
+        var chart_year = [];
+        var chart_boy = [];
+        var chart_girl = [];
+        console.log(data);
+        data.forEach(function(year_data){
+            // 第一次進來的時候year_data代表data[0]、第二次進來的時候year_data代表data[1]...依此類推
+            //篩掉空白的資料
+            if(year_data.年別!=""){
+                // Number(引數)：將括弧當中的引數轉換為數字，若字串非數字則回傳NaN(Not a Number)      
+                // 字串.replace(引數1, 引數2)：將字串中第一個引數的值取代為第二個引數的值
+                let girl = Number(year_data.女性嬰兒出生總數.replace(",", ""));
+                let boy = Number(year_data.男性嬰兒出生總數.replace(",", ""));
+                let total = girl+boy;
+                console.log(year_data.年別+"總嬰兒出生數="+total);
+
+                //display-zone用的
+                let node = document.createElement("p");
+                node.innerText =year_data.年別+"總嬰兒出生數="+total;
+                zone.appendChild(node);
+
+                //表格用的
+                let row = document.createElement("tr");
+
+                let row_data = [year_data.年別, boy, girl, total];
+                row_data.forEach(function(col_data){
+                    let col = document.createElement("td");
+                    col.innerText = col_data;
+                    row.appendChild(col);
+                });
+
+                table.appendChild(row);
+
+                //圖表用的
+                chart_year.push(year_data.年別);
+                chart_boy.push(boy);
+                chart_girl.push(girl);
+
+           }
+        });
+    
+        //ApexCharts
+        var options = {
+          series: [{
+          name: '男性嬰兒出生數',
+          data: chart_boy
+        }, {
+          name: '女性嬰兒出生數',
+          data: chart_girl
+        }],
+          chart: {
+          type: 'bar',
+          height: 350
+        },
+        plotOptions: {
+          bar: {
+            horizontal: false,
+            columnWidth: '55%',
+            borderRadius: 5,
+            borderRadiusApplication: 'end'
+          },
+        },
+        dataLabels: {
+          enabled: false
+        },
+        stroke: {
+          show: true,
+          width: 2,
+          colors: ['transparent']
+        },
+        xaxis: {
+          categories: chart_year,
+        },
+        yaxis: {
+          title: {
+            text: '出生數/人'
+          }
+        },
+        fill: {
+          opacity: 1
+        },
+        tooltip: {
+          y: {
+            formatter: function (val) {
+              return  val + " 人"
+            }
+          }
+        }
+        };
+
+        var chart = new ApexCharts(document.querySelector("#chart"), options);
+        chart.render();
+    </script>
+</body>
+</html>
